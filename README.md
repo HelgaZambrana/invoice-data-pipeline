@@ -1,6 +1,6 @@
 # 🧾 Invoice ETL Pipeline
 
-Proyecto de Data Engineering que permite la carga, transformación y almacenamiento de archivos de facturas provenientes de múltiples distribuidores. Utiliza Python (Pandas), FastAPI, PostgreSQL (via Supabase) y Docker.
+Proyecto de Data Engineering que permite la carga, transformación y almacenamiento de archivos de facturas (csv o excel). Valida el contenido, lo estandariza y lo carga en una base de datos PostgreSQL (via Supabase).
 
 ---
 
