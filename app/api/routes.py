@@ -15,7 +15,7 @@ async def upload_invoice(file: UploadFile = File(...)):
     try:
         # Leer el archivo en memoria como DataFrame
         contents = await file.read()
-        df = pd.read_csv(pd.io.common.BytesIO(contents))
+        file_like = BytesIO(contents)
         
         # Seleccionar método de lectura según el tipo de archivo
         if filename.endswith(".csv"):
