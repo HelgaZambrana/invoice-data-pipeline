@@ -5,68 +5,62 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from dotenv import load_dotenv
+from datetime import datetime
 
+# Inicializa variables y cliente
+load_dotenv()
 client = TestClient(app)
 
 SAMPLE_FILE = "data/samples/invoice_dirty_bulk.csv"
 LOG_FILE = "data/logs/transformations_log.csv"
-EXPECTED_ROWS = 100  # Ajustar según tu archivo CSV
-
-# Cargar variables de entorno desde .env
-load_dotenv()
+APP_LOG_FILE = "logs/app.log"
+EXPECTED_ROWS = 100  # Asegurate de que tu CSV tiene esta cantidad
 
 @pytest.fixture(scope="function", autouse=True)
-def clean_log_before_test():
+def clean_logs_before_test():
     """
-    Limpia el log antes de cada test para asegurar trazabilidad limpia.
+    Elimina logs antes de cada test.
     """
-    if os.path.exists(LOG_FILE):
-        os.remove(LOG_FILE)
+    for path in [LOG_FILE, APP_LOG_FILE]:
+        if os.path.exists(path):
+            os.remove(path)
 
 
-def test_upload_endpoint_with_dirty_file():
+def test_upload_and_integration_flow():
     """
-    Testea el flujo completo:
-    - Sube archivo sucio
-    - Transforma columnas
-    - Inserta en Supabase
-    - Genera log
+    Test de integración completo:
+    - Carga archivo
+    - Verifica respuesta
+    - Verifica log de transformaciones
+    - Verifica inserción en base de datos
+    - Verifica log general
     """
     assert os.path.exists(SAMPLE_FILE), "Missing test sample file"
 
+    # --- 1. Subir archivo
     with open(SAMPLE_FILE, "rb") as f:
         response = client.post(
             "/upload",
-            files={"file": ("invoice_dirty_bulk.csv", f, "text/csv")}
+            files={"file": (os.path.basename(SAMPLE_FILE), f, "text/csv")}
         )
 
-    # Verificar respuesta del backend
     assert response.status_code == 200, f"Unexpected status: {response.status_code}"
     data = response.json()
 
-    assert data["rows_inserted"] == EXPECTED_ROWS, f"Expected {EXPECTED_ROWS}, got {data['rows_inserted']}"
+    assert data["rows_inserted"] == EXPECTED_ROWS
     assert "product" in data["columns"]
     assert isinstance(data["preview"], list)
-    assert len(data["preview"]) >= 1
+    assert len(data["preview"]) > 0
 
-
-def test_transformation_log_created_and_populated():
-    """
-    Verifica que el archivo de log fue creado con encabezado y contenido.
-    """
-    assert os.path.exists(LOG_FILE), "Log file not created"
+    # --- 2. Verificar log de transformaciones
+    assert os.path.exists(LOG_FILE), "Transformation log not found"
 
     with open(LOG_FILE, newline='', encoding="utf-8") as f:
         reader = list(csv.reader(f))
+        assert reader[0] == ["timestamp", "row_idx", "column", "original", "transformed"]
+        assert len(reader) > 1, "Transformation log has no data"
 
-    assert len(reader) > 1, "Log file has no data rows"
-    assert reader[0] == ["timestamp", "row_idx", "column", "original", "transformed"], "Log header incorrect"
-
-
-def test_count_rows_in_supabase():
-    """
-    Conexión real a Supabase/PostgreSQL para verificar filas insertadas.
-    """
+    # --- 3. Verificar que se insertaron en Supabase/PostgreSQL
     conn = psycopg2.connect(
         host=os.getenv("DB_HOST"),
         port=os.getenv("DB_PORT"),
@@ -83,3 +77,11 @@ def test_count_rows_in_supabase():
     conn.close()
 
     assert count == EXPECTED_ROWS, f"Expected {EXPECTED_ROWS} rows in DB, found {count}"
+
+    # --- 4. Verificar log general
+    assert os.path.exists(APP_LOG_FILE), "Application log not found"
+
+    with open(APP_LOG_FILE, "r", encoding="utf-8") as log_file:
+        logs = log_file.read()
+        assert "invoices inserted into the database" in logs
+        assert str(EXPECTED_ROWS) in logs
