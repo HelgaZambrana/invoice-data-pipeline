@@ -67,13 +67,9 @@ Este proyecto incluye tests automatizados para los módulos principales (validat
 - validator.py	Verifica si un archivo contiene las columnas requeridas
 - ingestion.py	Valida que un archivo .csv o .xlsx pueda convertirse correctamente en un DataFrame
 
-📁 Archivos de prueba
-Los archivos se encuentran en data/samples/:
+Los archivos de prueba se encuentran en data/samples/:
 
-✅ invoice_demo.csv → válido
-
-✅ invoice_demo.xlsx → válido
-
-❌ invoice_invalid.csv → faltan columnas
-
-❌ invalid_file.txt → tipo no soportado
+- ✅ invoice_demo.csv → válido
+- ✅ invoice_demo.xlsx → válido
+- ❌ invoice_invalid.csv → faltan columnas
+- ❌ invalid_file.txt → tipo no soportado
