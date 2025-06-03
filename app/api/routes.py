@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 import pandas as pd
 
 from app.services.ingestion import read_file_to_dataframe
@@ -9,15 +9,15 @@ from app.services.loader import insert_invoices
 router = APIRouter()
 
 @router.post("/upload")
-async def upload_invoice(file: UploadFile = File(...)):
+async def upload_invoice(
+    file: UploadFile = File(...),
+    dry_run: bool = Query(False, description="Simula el proceso sin insertar en la base de datos")
+):
     try:
-        # Ingestión: leer archivo a DataFrame
+        # 1. Leer archivo
         df: pd.DataFrame = read_file_to_dataframe(file)
 
-        # ✅ Transformación ANTES de validar
-        df = standardize_dataframe(df)
-
-        # Validación: verificar columnas requeridas
+        # 2. Validar columnas requeridas
         missing = validate_required_columns(df)
         if missing:
             raise HTTPException(
@@ -25,18 +25,30 @@ async def upload_invoice(file: UploadFile = File(...)):
                 detail=f"Missing required columns: {', '.join(missing)}"
             )
 
-        # Carga: insertar datos en PostgreSQL/Supabase
+        # 3. Transformar
+        df = standardize_dataframe(df)
+
+        # 4. Si es dry_run, no insertar
+        if dry_run:
+            return {
+                "filename": file.filename,
+                "dry_run": True,
+                "columns": df.columns.tolist(),
+                "rows_detected": len(df),
+                "preview": df.head(5).to_dict(orient="records")
+            }
+
+        # 5. Insertar en DB
         result = insert_invoices(df)
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])
 
-        # Respuesta
-        preview = df.head(5).to_dict(orient="records")
         return {
             "filename": file.filename,
+            "dry_run": False,
             "rows_inserted": result["rows"],
             "columns": df.columns.tolist(),
-            "preview": preview
+            "preview": df.head(5).to_dict(orient="records")
         }
 
     except HTTPException:

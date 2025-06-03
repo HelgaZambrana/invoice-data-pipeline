@@ -1,7 +1,7 @@
 import pandas as pd
 import psycopg2
 from app.core.config import settings
-from app.core.logger import logger  # ✅ Importar logger
+from app.core.logger import logger  # Importar logger
 
 def insert_invoices(df: pd.DataFrame):
     """
@@ -34,7 +34,7 @@ def insert_invoices(df: pd.DataFrame):
         cur.close()
         conn.close()
 
-        # ✅ Log general (no de transformación)
+        # Log general (no de transformación)
         logger.info(f"{len(df)} invoices inserted into the database.")
         return {"message": "Invoices inserted successfully", "rows": len(df)}
 

@@ -14,7 +14,7 @@ client = TestClient(app)
 SAMPLE_FILE = "data/samples/invoice_dirty_bulk.csv"
 LOG_FILE = "data/logs/transformations_log.csv"
 APP_LOG_FILE = "logs/app.log"
-EXPECTED_ROWS = 100  # Asegurate de que tu CSV tiene esta cantidad
+EXPECTED_ROWS = 100  # Comprobar que el archivo de test tenga esta cantidad de rows
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_logs_before_test():
