@@ -23,7 +23,8 @@ def standardize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Corregir coma decimal en precio y convertir a float
-    df["price"] = df["price"].astype(str).str.replace(",", ".").astype(float).round(2)
+    df["price"] = df["price"].astype(str).str.replace(",", ".", regex=False).astype(float).round(2)
+
 
     # Convertir cantidad a entero de forma segura
     df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(int)
