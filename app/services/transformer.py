@@ -51,13 +51,19 @@ def standardize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             transformed = original.replace(",", ".")
             if original != transformed:
                 log_transformation(idx, "price", original, transformed)
-        df["price"] = df["price"].astype(str).str.replace(",", ".", regex=False).astype(float).round(2)
+        df["price"] = (
+            df["price"]
+            .astype(str)
+            .str.replace(",", ".", regex=False)
+            .astype(float)
+            .round(2)
+        )
 
     # 5. Convertir 'quantity' a int
     if "quantity" in df.columns:
         df["quantity"] = df["quantity"].astype(int)
 
-    # Log en consola para debug
+    # Consola para debugging
     print("\n[Transformer] DataFrame after standardization:")
     print(df.dtypes)
     print(df.head())
