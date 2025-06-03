@@ -28,7 +28,7 @@ async def upload_invoice(
         # 3. Transformar
         df = standardize_dataframe(df)
 
-        # 4. Si es dry_run, no insertar
+        # 4. Si dry_run está activado, devolver preview sin insertar
         if dry_run:
             return {
                 "filename": file.filename,
@@ -38,7 +38,7 @@ async def upload_invoice(
                 "preview": df.head(5).to_dict(orient="records")
             }
 
-        # 5. Insertar en DB
+        # 5. Insertar en la base de datos
         result = insert_invoices(df)
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])
