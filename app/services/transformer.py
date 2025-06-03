@@ -3,30 +3,48 @@ from app.services.validator import normalize_columns
 
 def standardize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Aplica normalización de columnas y transformaciones necesarias:
-    - Normaliza nombres de columnas
-    - Limpia espacios en blanco y capitaliza texto
-    - Convierte tipos de datos robustamente
+    Normaliza columnas y limpia datos para carga segura en base de datos.
+    Aplica:
+    - Renombrado de columnas
+    - Limpieza de espacios en strings
+    - Reemplazo de comas decimales por punto en precios
+    - Conversión de tipos
     """
 
-    # Normalizar nombres de columnas
+    # 1. Normalizar nombres de columnas
     df.columns = normalize_columns(df.columns.tolist())
 
-    # Limpiar texto
-    df["product"] = df["product"].astype(str).str.strip().str.lower()
-    df["customer"] = (
-        df["customer"]
-        .astype(str)
-        .str.strip()
-        .str.replace(r"\s+", " ", regex=True)
-        .str.title()
-    )
+    # 2. Limpiar columna 'product'
+    if "product" in df.columns:
+        df["product"] = df["product"].astype(str).str.strip().str.lower()
 
-    # Corregir coma decimal en precio y convertir a float
-    df["price"] = df["price"].astype(str).str.replace(",", ".", regex=False).astype(float).round(2)
+    # 3. Limpiar columna 'customer'
+    if "customer" in df.columns:
+        df["customer"] = (
+            df["customer"]
+            .astype(str)
+            .str.strip()
+            .str.replace(r"\s+", " ", regex=True)
+            .str.title()
+        )
 
+    # 4. Arreglar columna 'price' (comas → punto) y convertir a float
+    if "price" in df.columns:
+        df["price"] = (
+            df["price"]
+            .astype(str)
+            .str.replace(",", ".", regex=False)
+            .astype(float)
+            .round(2)
+        )
 
-    # Convertir cantidad a entero de forma segura
-    df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(int)
+    # 5. Convertir 'quantity' a int
+    if "quantity" in df.columns:
+        df["quantity"] = df["quantity"].astype(int)
+
+    # ✅ Log: mostrar preview y tipos
+    print("\n[Transformer] DataFrame after standardization:")
+    print(df.dtypes)
+    print(df.head())
 
     return df
