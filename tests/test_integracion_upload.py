@@ -1,14 +1,19 @@
 import os
 import csv
+import psycopg2
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from dotenv import load_dotenv
 
 client = TestClient(app)
 
 SAMPLE_FILE = "data/samples/invoice_dirty_bulk.csv"
 LOG_FILE = "data/logs/transformations_log.csv"
+EXPECTED_ROWS = 100  # Ajustar según tu archivo CSV
 
+# Cargar variables de entorno desde .env
+load_dotenv()
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_log_before_test():
@@ -39,7 +44,7 @@ def test_upload_endpoint_with_dirty_file():
     assert response.status_code == 200, f"Unexpected status: {response.status_code}"
     data = response.json()
 
-    assert data["rows_inserted"] >= 1, "No rows inserted"
+    assert data["rows_inserted"] == EXPECTED_ROWS, f"Expected {EXPECTED_ROWS}, got {data['rows_inserted']}"
     assert "product" in data["columns"]
     assert isinstance(data["preview"], list)
     assert len(data["preview"]) >= 1
@@ -56,3 +61,25 @@ def test_transformation_log_created_and_populated():
 
     assert len(reader) > 1, "Log file has no data rows"
     assert reader[0] == ["timestamp", "row_idx", "column", "original", "transformed"], "Log header incorrect"
+
+
+def test_count_rows_in_supabase():
+    """
+    Conexión real a Supabase/PostgreSQL para verificar filas insertadas.
+    """
+    conn = psycopg2.connect(
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT"),
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD")
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM invoices")
+    count = cur.fetchone()[0]
+
+    cur.close()
+    conn.close()
+
+    assert count == EXPECTED_ROWS, f"Expected {EXPECTED_ROWS} rows in DB, found {count}"
