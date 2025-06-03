@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import pandas as pd
-from typing import List
 from io import BytesIO
+from app.services.validator import validate_required_columns, normalize_columns
 
 router = APIRouter()
 
@@ -17,11 +17,22 @@ async def upload_invoice(file: UploadFile = File(...)):
         contents = await file.read()
         file_like = BytesIO(contents)
         
-        # Seleccionar método de lectura según el tipo de archivo
+        # Leer con Pandas según el tipo de archivo
         if filename.endswith(".csv"):
             df = pd.read_csv(file_like)
         else:  # Excel
             df = pd.read_excel(file_like)
+
+        # Validar columnas requeridas
+        missing = validate_required_columns(df)
+        if missing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Faltan columnas requeridas: {', '.join(missing)}"
+            )
+
+        # Renombrar columnas normalizadas en el DataFrame
+        df.columns = normalize_columns(df.columns.tolist())
 
         # Vista previa de los primeros 5 registros
         preview = df.head(5).to_dict(orient="records")
