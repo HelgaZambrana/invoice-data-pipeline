@@ -7,18 +7,28 @@ DEBUG = os.getenv("DEBUG_TESTS", "false").lower() == "true"
 
 def load_sample_dataframe(filename: str) -> pd.DataFrame:
     """
-    Carga un archivo CSV de la carpeta de ejemplos y devuelve un DataFrame.
+    Carga un archivo CSV o XLSX de la carpeta de ejemplos y devuelve un DataFrame.
     """
     path = os.path.join(DATA_DIR, filename)
     assert os.path.exists(path), f"File not found: {path}"
-    return pd.read_csv(path)
+
+    if filename.endswith(".csv"):
+        return pd.read_csv(path)
+    elif filename.endswith((".xls", ".xlsx")):
+        return pd.read_excel(path)
+    else:
+        raise ValueError(f"Unsupported file format: {filename}")
 
 
 def test_standardize_dataframe_sample():
     """
     Verifica que los datos cargados desde el archivo sample sean transformados correctamente.
+    Admite archivos .csv y .xlsx.
     """
-    df = load_sample_dataframe("invoice_dirty_sample.csv")
+    # CAMBIAR ACÁ para testear distintos formatos
+    sample_file = "invoice_dirty_sample.csv"  # o "invoice_dirty_sample.xlsx"
+
+    df = load_sample_dataframe(sample_file)
 
     if DEBUG:
         print("\nBefore cleaning:")
