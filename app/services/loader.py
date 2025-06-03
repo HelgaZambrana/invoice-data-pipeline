@@ -1,10 +1,7 @@
-import os
 import pandas as pd
 import psycopg2
-from dotenv import load_dotenv
-
-# Cargar variables desde .env
-load_dotenv()
+from app.core.config import settings
+from app.core.logger import logger
 
 def insert_invoices(df: pd.DataFrame):
     """
@@ -12,13 +9,13 @@ def insert_invoices(df: pd.DataFrame):
     """
 
     try:
-        # Conectar a PostgreSQL (Supabase)
+        # Conectar a PostgreSQL
         conn = psycopg2.connect(
-            host=os.getenv("DB_HOST"),
-            port=os.getenv("DB_PORT"),
-            dbname=os.getenv("DB_NAME"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD")
+            host=settings.DB_HOST,
+            port=settings.DB_PORT,
+            dbname=settings.DB_NAME,
+            user=settings.DB_USER,
+            password=settings.DB_PASSWORD
         )
         cur = conn.cursor()
 
@@ -38,6 +35,7 @@ def insert_invoices(df: pd.DataFrame):
         cur.close()
         conn.close()
 
+        logger.info(f"{len(df)} invoices inserted into the database.")
         return {"message": "Invoices inserted successfully", "rows": len(df)}
 
     except Exception as e:
