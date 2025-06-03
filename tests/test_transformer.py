@@ -3,6 +3,7 @@ import pandas as pd
 from app.services.transformer import standardize_dataframe
 
 DATA_DIR = "data/samples"
+DEBUG = os.getenv("DEBUG_TESTS", "false").lower() == "true"
 
 def load_sample_dataframe(filename: str) -> pd.DataFrame:
     """
@@ -17,9 +18,19 @@ def test_standardize_dataframe_sample():
     """
     Verifica que los datos cargados desde el archivo sample sean transformados correctamente.
     """
-    df = load_sample_dataframe("invoice_dirty_sample.csv")  # ← Este archivo lo podés crear con datos sucios
+    df = load_sample_dataframe("invoice_dirty_sample.csv")
+
+    if DEBUG:
+        print("\nBefore cleaning:")
+        print(df)
+
     df_transformed = standardize_dataframe(df)
 
+    if DEBUG:
+        print("\nAfter cleaning:")
+        print(df_transformed)
+
+    # Verificaciones
     assert "product" in df_transformed.columns
     assert "customer" in df_transformed.columns
     assert df_transformed["product"].str.contains(" ").sum() == 0, "Found unstripped spaces in 'product'"

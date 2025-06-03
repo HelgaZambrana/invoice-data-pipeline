@@ -15,7 +15,13 @@ def standardize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     # Transformaciones básicas por columna
     df["product"] = df["product"].astype(str).str.strip().str.lower()
-    df["customer"] = df["customer"].astype(str).str.strip().str.title()
+    df["customer"] = (
+        df["customer"]
+        .astype(str)
+        .str.strip()
+        .str.replace(r"\s+", " ", regex=True)  # Normaliza múltiples espacios
+        .str.title()
+    )
     df["price"] = df["price"].astype(float).round(2)
     df["quantity"] = df["quantity"].astype(int)
 
