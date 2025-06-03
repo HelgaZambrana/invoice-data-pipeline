@@ -1,6 +1,6 @@
 import pandas as pd
 from app.services.validator import normalize_columns
-from app.core.logger import log_transformation
+from app.core.log_transformations import log_transformation
 
 def standardize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
