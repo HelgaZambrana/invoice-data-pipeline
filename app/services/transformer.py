@@ -57,7 +57,7 @@ def standardize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     if "quantity" in df.columns:
         df["quantity"] = df["quantity"].astype(int)
 
-    # ✅ Log en consola para debug
+    # Log en consola para debug
     print("\n[Transformer] DataFrame after standardization:")
     print(df.dtypes)
     print(df.head())
