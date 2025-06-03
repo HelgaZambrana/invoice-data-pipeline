@@ -59,3 +59,28 @@ invoice-data-pipeline/
 ├── requirements.txt              # Paquetes instalados
 └── README.md                     # Descripción general del proyecto
 ```
+
+---
+
+## 💡 Use Case: Procesamiento de facturas mensuales
+
+Un Data Analyst recibe facturas mensuales en distintos formatos (.csv, .xls, .xlsx). Utiliza esta API para:
+
+1. Subir el archivo al endpoint `/upload`.
+2. Validar automáticamente que las columnas requeridas estén presentes (`product`, `price`, `quantity`, `customer`).
+3. Ver una vista previa de los datos.
+4. Cargar los datos directamente en una base PostgreSQL (ejemplo: Supabase), donde el equipo de BI puede consultarlos.
+
+Esta automatización ahorra tiempo, reduce errores manuales y estandariza el flujo de datos entrantes.
+
+📌 Resultado esperado:
+```json
+{
+  "filename": "invoice_demo.csv",
+  "rows_inserted": 3,
+  "columns": ["product", "price", "quantity", "customer"],
+  "preview": [
+    {"product": "Mouse", "price": 20.5, "quantity": 2, "customer": "Juan Perez"},
+    ...
+  ]
+}
