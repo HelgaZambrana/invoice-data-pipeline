@@ -1,7 +1,7 @@
 from typing import List, Set
 import pandas as pd
 
-# Definimos las columnas requeridas (ya normalizadas)
+# Definir las columnas requeridas (ya normalizadas)
 REQUIRED_COLUMNS = {"producto", "precio", "cantidad", "cliente"}
 
 def normalize_columns(columns: List[str]) -> List[str]:
