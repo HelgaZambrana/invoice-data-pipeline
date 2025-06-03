@@ -4,23 +4,15 @@ Este proyecto simula un pipeline real de carga de facturas desde múltiples dist
 
 ---
 
-## 🚀 Funcionalidades
+## 🚀 Tecnologías utilizadas
 
-- Subida de archivos de facturas (`.csv`, `.xls`, `.xlsx`)
-- Estandarización y transformación de datos con Pandas
-- Carga a base de datos PostgreSQL (Supabase)
-- API REST con FastAPI para gestionar la ingesta y monitoreo
-- Contenerización con Docker para facilitar despliegue
-
----
-
-## 🧱 Tecnologías utilizadas
-
-- Pandas
+- Python
 - FastAPI
-- PostgreSQL (via Supabase)
+- Pandas
+- PostgreSQL / Supabase
 - Docker
-- Uvicorn
+- Pytest (para testing)
+- dotenv
 
 ---
 
@@ -28,36 +20,17 @@ Este proyecto simula un pipeline real de carga de facturas desde múltiples dist
 
 ```plaintext
 invoice-data-pipeline/
-│
-├── app/                          
-│   ├── api/                      
-│   │   └── routes.py             # Definir el endpoint /upload y orquestar todo el pipeline
-│   ├── core/                    
-│   │   ├── config.py             # Centralizar las variables de entorno (.env) para DB, etc.
-│   │   └── logger.py             # Definir un logger para mensajes de debug o errores
-│   ├── services/                 
-│   │   ├── ingestion.py          # Leer el archivo subido (UploadFile) y convertirlo en DataFrame
-│   │   ├── transformer.py        # Limpiar y normalizar los nombres de columnas del DataFrame
-│   │   ├── loader.py             # Conectar con Supabase y guardar los datos en la base de datos PostgreSQL
-│   │   └── validator.py          # Verificar que estén las columnas mínimas requeridas
-│   └── main.py                   # Punto de entrada de la app FastAPI
-│
-├── data/                        
-│   └── samples/                  # Facturas .csv, .xlsx, etc. para pruebas
-│
-├── db/                          
-│   └── schema.sql                # Definición inicial de `invoices`
-│
-├── tests/                        
-│   ├── test_transformer.py       # (PENDIENTE)
-│   └── test_validator.py         # (PENDIENTE)
-│
-├── .env                          
-├── .gitignore                    
-├── Dockerfile                    # Imagen para correr la app (PENDIENTE)
-├── docker-compose.yml            # Compose para FastAPI + PostgreSQL (PENDIENTE)
-├── requirements.txt              
-└── README.md                     
+├── app/
+│ ├── api/ # Endpoints FastAPI
+│ ├── core/ # Configuración (env, logger)
+│ ├── services/ # Ingestión, validación, transformación, carga
+│ └── main.py # Entrada principal
+├── data/samples/ # Archivos de prueba (.csv, .xlsx)
+├── db/ # SQL para creación de tablas
+├── tests/ # Tests automatizados con pytest
+├── .env # Variables de entorno (no versionado)
+├── requirements.txt # Dependencias
+└── README.md                 
 ```
 
 ---
@@ -84,3 +57,23 @@ Esta automatización ahorra tiempo, reduce errores manuales y estandariza el flu
     ...
   ]
 }
+```
+
+---
+
+## ✅ Testing
+Este proyecto incluye tests automatizados para los módulos principales (validator, ingestion).
+
+- validator.py	Verifica si un archivo contiene las columnas requeridas
+- ingestion.py	Valida que un archivo .csv o .xlsx pueda convertirse correctamente en un DataFrame
+
+📁 Archivos de prueba
+Los archivos se encuentran en data/samples/:
+
+✅ invoice_demo.csv → válido
+
+✅ invoice_demo.xlsx → válido
+
+❌ invoice_invalid.csv → faltan columnas
+
+❌ invalid_file.txt → tipo no soportado

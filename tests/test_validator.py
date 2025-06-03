@@ -21,6 +21,10 @@ def test_valid_invoice_file():
 
     missing = validate_required_columns(df)
 
+    print("\n test_valid_invoice_file")
+    print(f"Columns found: {set(df.columns)}")
+    print(f"Missing columns: {missing}")
+
     assert missing == set(), f"Expected no missing columns, but got: {missing}"
 
 
@@ -32,9 +36,12 @@ def test_invalid_invoice_file():
 
     missing = validate_required_columns(df)
 
-    # Calculamos dinámicamente qué columnas faltan
     present_columns = set(df.columns)
     expected_missing = REQUIRED_COLUMNS - present_columns
 
-    assert missing == expected_missing, f"Expected missing: {expected_missing}, got: {missing}"
+    print("\n test_invalid_invoice_file")
+    print(f"Columns present: {present_columns}")
+    print(f"Missing columns detected: {missing}")
+    print(f"Expected missing columns: {expected_missing}")
 
+    assert missing == expected_missing, f"Expected missing: {expected_missing}, got: {missing}"
