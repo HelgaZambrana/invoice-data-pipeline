@@ -14,6 +14,9 @@ async def upload_invoice(file: UploadFile = File(...)):
         # Ingestión: leer archivo a DataFrame
         df: pd.DataFrame = read_file_to_dataframe(file)
 
+        # ✅ Transformación ANTES de validar
+        df = standardize_dataframe(df)
+
         # Validación: verificar columnas requeridas
         missing = validate_required_columns(df)
         if missing:
@@ -21,9 +24,6 @@ async def upload_invoice(file: UploadFile = File(...)):
                 status_code=400,
                 detail=f"Missing required columns: {', '.join(missing)}"
             )
-            
-        # Transformación: normalizar nombres de columnas
-        df = standardize_dataframe(df)
 
         # Carga: insertar datos en PostgreSQL/Supabase
         result = insert_invoices(df)
