@@ -1,6 +1,6 @@
 # 🧾 Invoice ETL Pipeline
 
-Proyecto de Data Engineering que permite la carga, transformación y almacenamiento de archivos de facturas (csv o excel). Valida el contenido, lo estandariza y lo carga en una base de datos PostgreSQL (via Supabase).
+Este proyecto simula un pipeline real de carga de facturas desde múltiples distribuidores. Modulariza el flujo en etapas independientes: lectura, transformación, validación y carga. Cada parte está desacoplada para permitir testing, mantenimiento y escalabilidad. La base de datos es un PostgreSQL gestionado por Supabase y el backend está desarrollado con FastAPI.
 
 ---
 
@@ -8,7 +8,7 @@ Proyecto de Data Engineering que permite la carga, transformación y almacenamie
 
 - Subida de archivos de facturas (`.csv`, `.xls`, `.xlsx`)
 - Estandarización y transformación de datos con Pandas
-- Carga a base de datos PostgreSQL (Supabase o local)
+- Carga a base de datos PostgreSQL (Supabase)
 - API REST con FastAPI para gestionar la ingesta y monitoreo
 - Contenerización con Docker para facilitar despliegue
 
@@ -29,35 +29,35 @@ Proyecto de Data Engineering que permite la carga, transformación y almacenamie
 ```plaintext
 invoice-data-pipeline/
 │
-├── app/                          # Código principal de la app
-│   ├── api/                      # Endpoints de FastAPI
-│   │   └── routes.py             # Rutas principales (upload, trigger ETL)
-│   ├── core/                     # Configuración y utilidades
-│   │   ├── config.py             # Config de entorno (Supabase, etc.)
-│   │   └── logger.py             # Logger centralizado
-│   ├── services/                 # Lógica de negocio y procesamiento
-│   │   ├── ingestion.py          # Ingesta de archivos (PENDIENTE)
-│   │   ├── transformer.py        # Transformaciones con Pandas (PENDIENTE)
-│   │   ├── loader.py             # Carga a la base de datos (PENDIENTE)
-│   │   └── validator.py          # Validación de columnas (IMPLEMENTADO)
+├── app/                          
+│   ├── api/                      
+│   │   └── routes.py             # Definir el endpoint /upload y orquestar todo el pipeline
+│   ├── core/                    
+│   │   ├── config.py             # Centralizar las variables de entorno (.env) para DB, etc.
+│   │   └── logger.py             # Definir un logger para mensajes de debug o errores
+│   ├── services/                 
+│   │   ├── ingestion.py          # Leer el archivo subido (UploadFile) y convertirlo en DataFrame
+│   │   ├── transformer.py        # Limpiar y normalizar los nombres de columnas del DataFrame
+│   │   ├── loader.py             # Conectar con Supabase y guardar los datos en la base de datos PostgreSQL
+│   │   └── validator.py          # Verificar que estén las columnas mínimas requeridas
 │   └── main.py                   # Punto de entrada de la app FastAPI
 │
-├── data/                         # Datos de ejemplo
+├── data/                        
 │   └── samples/                  # Facturas .csv, .xlsx, etc. para pruebas
 │
-├── db/                           # Scripts SQL (creación de tablas)
-│   └── schema.sql                # Definición inicial de `facturas`, etc.
+├── db/                          
+│   └── schema.sql                # Definición inicial de `invoices`
 │
-├── tests/                        # Tests automatizados (pytest)
+├── tests/                        
 │   ├── test_transformer.py       # (PENDIENTE)
-│   └── test_validator.py         # (Tests para validator.py)
+│   └── test_validator.py         # (PENDIENTE)
 │
-├── .env                          # Variables de entorno (base de datos)
-├── .gitignore                    # Ignorar `.env`, `venv/`, etc.
-├── Dockerfile                    # Imagen para correr la app
-├── docker-compose.yml            # Compose para FastAPI + PostgreSQL
-├── requirements.txt              # Paquetes instalados
-└── README.md                     # Descripción general del proyecto
+├── .env                          
+├── .gitignore                    
+├── Dockerfile                    # Imagen para correr la app (PENDIENTE)
+├── docker-compose.yml            # Compose para FastAPI + PostgreSQL (PENDIENTE)
+├── requirements.txt              
+└── README.md                     
 ```
 
 ---
