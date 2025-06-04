@@ -2,7 +2,7 @@ import os
 import csv
 from datetime import datetime
 
-LOG_PATH = "logs/transformations_log.csv"
+LOG_PATH = os.path.join("data", "logs", "transformations_log.csv")
 os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
 
 def log_transformation(row_idx: int, column: str, original: str, transformed: str):
