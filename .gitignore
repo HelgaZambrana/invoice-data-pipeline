@@ -4,5 +4,6 @@ __pycache__/
 *.db
 .vscode/
 data/
+logs/
 venv/
 scripts/
