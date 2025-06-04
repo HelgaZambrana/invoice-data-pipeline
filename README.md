@@ -27,7 +27,7 @@ As a Data Analyst exploring the Data Engineering world, I wanted to build an end
 
 ---
 
-## 📁 Estructura del proyecto
+## 📁 Project Structure
 
 ```plaintext
 invoice-data-pipeline/
