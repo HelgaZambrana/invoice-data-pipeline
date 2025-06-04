@@ -1,18 +1,29 @@
-# 🧾 Invoice ETL Pipeline
+# Invoice Data Pipeline with FastAPI & Supabase
 
-Este proyecto simula un pipeline real de carga de facturas desde múltiples distribuidores. Modulariza el flujo en etapas independientes: lectura, transformación, validación y carga. Cada parte está desacoplada para permitir testing, mantenimiento y escalabilidad. La base de datos es un PostgreSQL gestionado por Supabase y el backend está desarrollado con FastAPI.
+## 🚀 Project Overview
+
+This project simulates a real-world data pipeline to process and ingest invoice data using:
+
+- FastAPI for API development
+- Pandas for data manipulation
+- Supabase (PostgreSQL) as the database layer
+- Docker for containerized deployment
+- Pytest for integration tests
+
+It supports both real insertions and dry_run (test mode) to ensure data is valid before touching production
 
 ---
 
-## 🚀 Tecnologías utilizadas
+## 🧠 Why This Project?
 
-- Python
-- FastAPI
-- Pandas
-- PostgreSQL / Supabase
-- Docker
-- Pytest (para testing)
-- dotenv
+As a Data Analyst exploring the Data Engineering world, I wanted to build an end-to-end solution:
+
+- Upload CSVs that are similar to those provided by users
+- Validate required fields
+- Clean & transform data (with full traceability)
+- Insert into a real DB (hosted on Supabase)
+- Offer preview / dry-run safety mode
+- Be deployable in real scenarios via Docker
 
 ---
 
@@ -21,55 +32,42 @@ Este proyecto simula un pipeline real de carga de facturas desde múltiples dist
 ```plaintext
 invoice-data-pipeline/
 ├── app/
-│ ├── api/ # Endpoints FastAPI
-│ ├── core/ # Configuración (env, logger)
-│ ├── services/ # Ingestión, validación, transformación, carga
-│ └── main.py # Entrada principal
-├── data/samples/ # Archivos de prueba (.csv, .xlsx)
-├── db/ # SQL para creación de tablas
-├── tests/ # Tests automatizados con pytest
-├── .env # Variables de entorno (no versionado)
-├── requirements.txt # Dependencias
-└── README.md                 
+│   ├── api/             # API endpoints
+│   ├── core/            # Config, logging, DB connection
+│   ├── services/        # Ingestion, validation, transformation, loading
+├── data/
+│   ├── samples/         # Sample CSVs for testing
+│   ├── logs/            # App + transformation logs
+├── tests/               # Integration tests with dry_run and real insert
+├── Dockerfile
+├── docker-compose.yml
+├── .env
+├── requirements.txt
+└── README.md            
 ```
 
 ---
+## 📦 How to Run
 
-## 💡 Use Case: Procesamiento de facturas mensuales
+### Locally (Dev)
 
-Un Data Analyst recibe facturas mensuales en distintos formatos (.csv, .xls, .xlsx). Utiliza esta API para:
+uvicorn app.main:app --reload
 
-1. Subir el archivo al endpoint `/upload`.
-2. Validar automáticamente que las columnas requeridas estén presentes (`product`, `price`, `quantity`, `customer`).
-3. Ver una vista previa de los datos.
-4. Cargar los datos directamente en una base PostgreSQL (ejemplo: Supabase), donde el equipo de BI puede consultarlos.
+Then go to http://localhost:8000/docs and use the Swagger UI.
 
-Esta automatización ahorra tiempo, reduce errores manuales y estandariza el flujo de datos entrantes.
+### With Docker
 
-📌 Resultado esperado:
-```json
-{
-  "filename": "invoice_demo.csv",
-  "rows_inserted": 3,
-  "columns": ["product", "price", "quantity", "customer"],
-  "preview": [
-    {"product": "Mouse", "price": 20.5, "quantity": 2, "customer": "Juan Perez"},
-    ...
-  ]
-}
-```
+docker-compose up --build
+
+Then access: http://localhost:8000/docs
 
 ---
 
-## ✅ Testing
-Este proyecto incluye tests automatizados para los módulos principales (validator, ingestion).
+## 🧪 Run Tests
 
-- validator.py	Verifica si un archivo contiene las columnas requeridas
-- ingestion.py	Valida que un archivo .csv o .xlsx pueda convertirse correctamente en un DataFrame
+pytest tests/
 
-Los archivos de prueba se encuentran en data/samples/:
-
-- ✅ invoice_demo.csv → válido
-- ✅ invoice_demo.xlsx → válido
-- ❌ invoice_invalid.csv → faltan columnas
-- ❌ invalid_file.txt → tipo no soportado
+Includes:
+- File upload and DB verification
+- Dry run integrity
+- Log content assertions
