@@ -4,9 +4,8 @@ import pandas as pd
 from app.services.ingestion import read_file_to_dataframe
 from app.services.transformer import standardize_dataframe
 from app.services.validator import validate_required_columns
-from app.services.loader import insert_invoices
-from app.services.loader import reset_invoices_table
-from app.core.config import settings
+from app.services.loader import insert_invoices, reset_invoices_table
+from app.core.config import settings # para leer ENABLE_DEV_ENDPOINTS
 
 router = APIRouter()
 
@@ -61,11 +60,17 @@ async def upload_invoice(
 # ----------------------------------------------------------------------
 # Endpoint extra solo disponible si ENABLE_DEV_ENDPOINTS=true en .env
 # ----------------------------------------------------------------------
-if settings.ENABLE_DEV_ENDPOINTS:
-    @router.post("/reset")
-    async def reset_table():
-        try:
-            reset_invoices_table()
-            return {"message": "Tabla 'invoices' vaciada correctamente"}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error al resetear tabla: {str(e)}")
+@router.post("/dev/reset")
+def reset_invoices():
+    """
+    Vacía la tabla invoices y reinicia el contador de ID.
+    Solo accesible si ENABLE_DEV_ENDPOINTS=true.
+    """
+    if not settings.ENABLE_DEV_ENDPOINTS:
+        raise HTTPException(status_code=403, detail="Dev endpoints are disabled")
+
+    try:
+        reset_invoices_table()
+        return {"message": "Tabla invoices vaciada correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al resetear: {str(e)}")
